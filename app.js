@@ -7,7 +7,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const imagesController = require(__dirname + '/modules/images/imageController');
 var app = express();
-
+var s = require('string');
 
 //set public folder public
 app.use(express.static(__dirname + '/public'));
@@ -42,16 +42,16 @@ app.post('/image/', (req, res) => {
 });
 //update data
 app.put('/image', (req, res) => {
-  var name =req.body.name;
-  var imageLink =req.body.imageLink;
-  var description =req.body.description;
-  imagesController.updateImage(name, imageLink,description);
+  var name = req.body.name;
+  var imageLink = req.body.imageLink;
+  var description = req.body.description;
+  imagesController.updateImage(name, imageLink, description);
   res.send('Success');
 });
 //delete data
 app.delete('/image', (req, res) => {
   var name = req.body.name;
-   imagesController.deleteImage(name);
+  imagesController.deleteImage(name);
   res.send("xóa thành công");
 });
 //return data
@@ -63,7 +63,18 @@ app.get('/image', (req, res) => {
   });
   res.send(htmlString);
 });
+app.post('/image/one', (req, res) => {
+  var imageInfoCollection = imagesController.fetchImageCollection();
+  var htmlString = '';
+  var name = req.body.name;
+  var description = req.body.description;
 
+  imageInfoCollection.forEach((data) => {
+    if (s(data.name).contains(name) && s(data.description).contains(description))
+      htmlString += `<div>${data.name}</div><img src="${data.imageLink}"><div>${data.description}</div>`;
+  });
+  res.send(htmlString);
+});
 //mo 1 cai port de chay local
 app.listen(6969, (req, res) => {
   console.log('Dai bang nghe ro San sang tha trung');
