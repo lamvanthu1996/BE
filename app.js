@@ -1,57 +1,70 @@
-const fs = require('fs');
-//
-// fs.writeFileSync('firstapp.txt','Hello world, file system, â', encoding ='utf-8');
-//
-// var content = fs.readFileSync('firstapp.txt',encoding='utf-8');
-//
-// console.log(content);
+console.log('Alo! Alo! Chim se goi dai bang. Dai bang nghe ro tra loi?');
 
-//dung thu vien express
+const fs = require('fs');
+//dung cai thu vien express
 const express = require('express');
 
+const bodyParser = require('body-parser');
+const imagesController = require(__dirname + '/modules/images/imageController');
 var app = express();
+
+
 //set public folder public
 app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.json({
+  extended: true
+}));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
-// var tenfunction= (req, res) =>{
-//   res.send('./public/index.html');
-// };
-//
-
-
-app.get('/', function(req, res) {
-    res.send('./public/index.html');
+app.get('/', (req, res) => {
+  res.send('./public/index.html');
 });
-app.get('/image', function(req, res) {
-    res.send('<img src= "http://wallpaper-gallery.net/single/galaxy/galaxy-2.html ">');
+//add data
+app.post('/image/', (req, res) => {
+  //doc du lieu tu file imageData
+  var imageInfoCollection = imagesController.fetchImageCollection();
+  //khai bao object
+  var imageInfo = {
+    name: req.body.name,
+    imageLink: req.body.imageLink,
+    description: req.body.description
+  };
+
+  //push data moi vao collection
+  imageInfoCollection.push(imageInfo);
+  //luu lai vao file
+  imagesController.saveImageCollection(imageInfoCollection);
+
+  //bao thanh cong
+  res.send('Success');
 });
-app.get('/image/add', (req, res) => {
-    // khai bao object
-    var imageInfo = {
-        name: req.query.name,
-        imageLink: req.query.imageLink,
-        description: req.query.description
-    };
-
-    //luu lai vao file
-
-    fs.appendFile('imageData.json', JSON.stringify(imageInfo),'utf-8');
-    //bao tanh cong
-    res.send('Success');
+//update data
+app.put('/image', (req, res) => {
+  var name =req.body.name;
+  var imageLink =req.body.imageLink;
+  var description =req.body.description;
+  imagesController.updateImage(name, imageLink,description);
+  res.send('Success');
 });
-app.get('/image/get', function(req, res) {
-    fs.readFile('imageData.json', function(err, data) {
-        if (err) throw err;
-        var obj = JSON.parse(data);
-        res.send("Tên ảnh: " + obj.name);
-        // res.send('img src = obj.imageLink');
-        res.send('<img src= "http://wallpaper-gallery.net/single/galaxy/galaxy-2.html ">');
-
-
-    });
-
+//delete data
+app.delete('/image', (req, res) => {
+  var name = req.body.name;
+   imagesController.deleteImage(name);
+  res.send("xóa thành công");
 });
-//mo port chay local
-app.listen(6969, function(req, res) {
-    console.log('app listen  on 6969');
+//return data
+app.get('/image', (req, res) => {
+  var imageInfoCollection = imagesController.fetchImageCollection();
+  var htmlString = '';
+  imageInfoCollection.forEach((data) => {
+    htmlString += `<div>${data.name}</div><img src="${data.imageLink}"><div>${data.description}</div>`;
+  });
+  res.send(htmlString);
+});
+
+//mo 1 cai port de chay local
+app.listen(6969, (req, res) => {
+  console.log('Dai bang nghe ro San sang tha trung');
 });
