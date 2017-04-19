@@ -63,11 +63,11 @@ app.get('/image', (req, res) => {
   });
   res.send(htmlString);
 });
-app.post('/image/one', (req, res) => {
+app.get('/image/one', (req, res) => {
   var imageInfoCollection = imagesController.fetchImageCollection();
   var htmlString = '';
-  var name = req.body.name;
-  var description = req.body.description;
+  var name = req.query.name;
+  var description = req.query.description;
 
   imageInfoCollection.forEach((data) => {
     if (s(data.name).contains(name) && s(data.description).contains(description))
